@@ -1,0 +1,548 @@
+{
+	"info": {
+		"_postman_id": "2250f31e-9c57-4a58-8615-ce86fe2ce7dd",
+		"name": "Deck of cards API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get a new deck (unshuffled)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// make reponse available as JSON\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"// write response to environment\r",
+							"pm.environment.set(\"deckId\", jsonData.deck_id);\r",
+							"pm.environment.set(\"cardsInDeck\", jsonData.remaining);\r",
+							"\r",
+							"// tests\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"check deck is unshuffled\", function () {\r",
+							"    pm.expect(jsonData.shuffled).to.eql(false);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/new",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						"new"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get a new deck (shuffled)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// make reponse available as JSON\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"// write response to environment\r",
+							"pm.environment.set(\"deckId\", jsonData.deck_id);\r",
+							"pm.environment.set(\"cardsInDeck\", jsonData.remaining);\r",
+							"\r",
+							"// tests\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"check deck is shuffled\", function () {\r",
+							"    pm.expect(jsonData.shuffled).to.eql(true);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/new/shuffle/",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						"new",
+						"shuffle",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Draw two cards",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"two cards removed from deck\", function () {\r",
+							"    const cardsDrawn = jsonData.cards.length\r",
+							"    console.log('cards drawn: '+cardsDrawn);\r",
+							"    const actualLeft = pm.environment.get('cardsInDeck') - cardsDrawn\r",
+							"    console.log('actualLeft: ' + actualLeft)\r",
+							"    pm.expect(jsonData.remaining).to.eql(actualLeft);\r",
+							"});\r",
+							"\r",
+							"// update cards in deck tracker after test\r",
+							"pm.environment.set('cardsInDeck',jsonData.remaining);\r",
+							"\r",
+							"// add cards to a buffer\r",
+							"const noOfCardsDrawn = jsonData.cards.length;\r",
+							"console.log(noOfCardsDrawn);\r",
+							"\r",
+							"for(i=0; i<noOfCardsDrawn; i++) {\r",
+							"    bufferName = 'cardBuffer'+i\r",
+							"    pm.environment.set(bufferName,jsonData.cards[i].code);\r",
+							"    console.log(jsonData.cards[i].code);\r",
+							"}\r",
+							"\r",
+							"\r",
+							"// // basic comparison function\r",
+							"\r",
+							"// const card1 = pm.environment.get('cardBuffer0');\r",
+							"// const card2 = pm.environment.get('cardBuffer1');\r",
+							"\r",
+							"// const whoWins = function(card1,card2) {\r",
+							"//     card1 = cardValue(card1);\r",
+							"//     card2 = cardValue(card2);\r",
+							"//     return card1 >= card2;\r",
+							"    \r",
+							"// }\r",
+							"\r",
+							"// const cardValue = function(card){\r",
+							"//     card = card.substring(0,1);\r",
+							"//     switch (card){\r",
+							"//         case \"A\": card = \"1\"; break;\r",
+							"//         case \"J\": card = \"11\"; break;\r",
+							"//         case \"K\": card = \"13\"; break;\r",
+							"//         case \"Q\": card = \"12\"; break;\r",
+							"//         case \"0\": card = \"10\"; break;\r",
+							"//     }\r",
+							"//     return parseInt(card);\r",
+							"// }\r",
+							"\r",
+							"// pm.test(\"player 1 beats player 2\", function(){\r",
+							"//     const result = whoWins(card1,card2);\r",
+							"//     console.log(`player 1: ${cardValue(card1)}\\nplayer 2: ${cardValue(card2)}\\nWinner: Player ${!result+1}`)\r",
+							"//     pm.expect(result).to.eql(true);\r",
+							"//     })\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/:deck_id/draw/?count=2",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						":deck_id",
+						"draw",
+						""
+					],
+					"query": [
+						{
+							"key": "count",
+							"value": "2"
+						}
+					],
+					"variable": [
+						{
+							"key": "deck_id",
+							"value": "{{deckId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add two cards to player 1 hand",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/:deck_id/pile/:pile_name/add/?cards={{cardBuffer0}},{{cardBuffer1}}",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						":deck_id",
+						"pile",
+						":pile_name",
+						"add",
+						""
+					],
+					"query": [
+						{
+							"key": "cards",
+							"value": "{{cardBuffer0}},{{cardBuffer1}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "deck_id",
+							"value": "{{deckId}}"
+						},
+						{
+							"key": "pile_name",
+							"value": "Player1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Draw two cards Copy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"two cards removed from deck\", function () {\r",
+							"    const cardsDrawn = jsonData.cards.length\r",
+							"    console.log('cards drawn: '+cardsDrawn);\r",
+							"    const actualLeft = pm.environment.get('cardsInDeck') - cardsDrawn\r",
+							"    console.log('actualLeft: ' + actualLeft)\r",
+							"    pm.expect(jsonData.remaining).to.eql(actualLeft);\r",
+							"});\r",
+							"\r",
+							"// update cards in deck tracker after test\r",
+							"pm.environment.set('cardsInDeck',jsonData.remaining);\r",
+							"\r",
+							"// add cards to a buffer\r",
+							"const noOfCardsDrawn = jsonData.cards.length;\r",
+							"console.log(noOfCardsDrawn);\r",
+							"\r",
+							"for(i=0; i<noOfCardsDrawn; i++) {\r",
+							"    bufferName = 'cardBuffer'+i\r",
+							"    pm.environment.set(bufferName,jsonData.cards[i].code);\r",
+							"    console.log(jsonData.cards[i].code);\r",
+							"}\r",
+							"\r",
+							"\r",
+							"// // basic comparison function\r",
+							"\r",
+							"// const card1 = pm.environment.get('cardBuffer0');\r",
+							"// const card2 = pm.environment.get('cardBuffer1');\r",
+							"\r",
+							"// const whoWins = function(card1,card2) {\r",
+							"//     card1 = cardValue(card1);\r",
+							"//     card2 = cardValue(card2);\r",
+							"//     return card1 >= card2;\r",
+							"    \r",
+							"// }\r",
+							"\r",
+							"// const cardValue = function(card){\r",
+							"//     card = card.substring(0,1);\r",
+							"//     switch (card){\r",
+							"//         case \"A\": card = \"1\"; break;\r",
+							"//         case \"J\": card = \"11\"; break;\r",
+							"//         case \"K\": card = \"13\"; break;\r",
+							"//         case \"Q\": card = \"12\"; break;\r",
+							"//         case \"0\": card = \"10\"; break;\r",
+							"//     }\r",
+							"//     return parseInt(card);\r",
+							"// }\r",
+							"\r",
+							"// pm.test(\"player 1 beats player 2\", function(){\r",
+							"//     const result = whoWins(card1,card2);\r",
+							"//     console.log(`player 1: ${cardValue(card1)}\\nplayer 2: ${cardValue(card2)}\\nWinner: Player ${!result+1}`)\r",
+							"//     pm.expect(result).to.eql(true);\r",
+							"//     })\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/:deck_id/draw/?count=2",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						":deck_id",
+						"draw",
+						""
+					],
+					"query": [
+						{
+							"key": "count",
+							"value": "2"
+						}
+					],
+					"variable": [
+						{
+							"key": "deck_id",
+							"value": "{{deckId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add two cards to player 2 hand",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/:deck_id/pile/:pile_name/add/?cards={{cardBuffer0}},{{cardBuffer1}}",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						":deck_id",
+						"pile",
+						":pile_name",
+						"add",
+						""
+					],
+					"query": [
+						{
+							"key": "cards",
+							"value": "{{cardBuffer0}},{{cardBuffer1}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "deck_id",
+							"value": "{{deckId}}"
+						},
+						{
+							"key": "pile_name",
+							"value": "Player2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Pile player 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"// write player 1's hand to the environment\r",
+							"\r",
+							"const playerCards = jsonData.piles.Player1.cards;\r",
+							"\r",
+							"const playerCardCodes = playerCards.map( card => {\r",
+							"    return card.code\r",
+							"})\r",
+							"\r",
+							"console.log(playerCardCodes);\r",
+							"\r",
+							"pm.environment.set(\"player1Hand\",JSON.stringify(playerCardCodes));"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/:deck_id/pile/:pilename/list",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						":deck_id",
+						"pile",
+						":pilename",
+						"list"
+					],
+					"variable": [
+						{
+							"key": "deck_id",
+							"value": "{{deckId}}"
+						},
+						{
+							"key": "pilename",
+							"value": "Player1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get pile Player 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"// write player 2's hand to the environment\r",
+							"\r",
+							"const playerCards = jsonData.piles.Player2.cards;\r",
+							"\r",
+							"const playerCardCodes = playerCards.map( card => {\r",
+							"    return card.code\r",
+							"})\r",
+							"\r",
+							"// console.log(playerCardCodes);\r",
+							"\r",
+							"pm.environment.set(\"player2Hand\",JSON.stringify(playerCardCodes));\r",
+							"\r",
+							"// play game\r",
+							"\r",
+							"\r",
+							"\r",
+							"const player1Hand = JSON.parse(pm.environment.get('player1Hand'));\r",
+							"const player2Hand = JSON.parse(pm.environment.get('player2Hand'));\r",
+							"\r",
+							"// basic comparison function\r",
+							"const whoWins = function(p1Hand,p2Hand) {\r",
+							"\r",
+							"    let player1Value = reducer(p1Hand);\r",
+							"    console.log('player1 value: '+player1Value);\r",
+							"    let player2Value = reducer(p2Hand);\r",
+							"    console.log('player2 value: '+player2Value);\r",
+							"\r",
+							"    return player1Value >= player2Value;\r",
+							"}\r",
+							"\r",
+							"const cardValue = function(card){\r",
+							"    card = String(card).substr(0,1);\r",
+							"    switch (card){\r",
+							"        case \"A\": card = \"1\"; break;\r",
+							"        case \"J\": card = \"11\"; break;\r",
+							"        case \"K\": card = \"13\"; break;\r",
+							"        case \"Q\": card = \"12\"; break;\r",
+							"        case \"0\": card = \"10\"; break;\r",
+							"    }\r",
+							"    return parseInt(card);\r",
+							"}\r",
+							"\r",
+							"const reducer = function(hand) {\r",
+							"    let total = 0\r",
+							"    for (card of hand) {\r",
+							"        total += cardValue(card)\r",
+							"    }\r",
+							"    return total\r",
+							"}\r",
+							"\r",
+							"\r",
+							"pm.test(\"player 1 beats player 2\", function(){\r",
+							"    const result = whoWins(player1Hand,player2Hand);\r",
+							"    console.log(`player 1: ${player1Hand}\\nplayer 2: ${player2Hand}\\nWinner: Player ${!result+1}`)\r",
+							"    pm.expect(result).to.eql(true);\r",
+							"    })\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://deckofcardsapi.com/api/deck/:deck_id/pile/:pilename/list",
+					"protocol": "https",
+					"host": [
+						"deckofcardsapi",
+						"com"
+					],
+					"path": [
+						"api",
+						"deck",
+						":deck_id",
+						"pile",
+						":pilename",
+						"list"
+					],
+					"variable": [
+						{
+							"key": "deck_id",
+							"value": "{{deckId}}"
+						},
+						{
+							"key": "pilename",
+							"value": "Player2"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
